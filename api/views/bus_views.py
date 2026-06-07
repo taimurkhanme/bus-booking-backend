@@ -94,6 +94,20 @@ class BusDetailView(APIView):
             'data': serializer.data
         }, status=status.HTTP_200_OK)
 
+    def delete(self, request, pk):
+        if not request.user.is_staff:
+            return Response({
+                'success': False,
+                'error': 'Permission denied. Staff access required.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        bus = get_object_or_404(Bus, pk=pk)
+        bus.delete()
+        return Response({
+            'success': True,
+            'message': 'Bus successfully deleted.'
+        }, status=status.HTTP_200_OK)
+
 
 class RouteListView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -139,6 +153,20 @@ class RouteDetailView(APIView):
         return Response({
             'success': True,
             'data': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        if not request.user.is_authenticated or not request.user.is_staff:
+            return Response({
+                'success': False,
+                'error': 'Permission denied. Staff access required.'
+            }, status=status.HTTP_403_FORBIDDEN)
+        
+        route = get_object_or_404(Route, pk=pk)
+        route.delete()
+        return Response({
+            'success': True,
+            'message': 'Route successfully deleted.'
         }, status=status.HTTP_200_OK)
 
 
