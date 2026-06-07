@@ -20,6 +20,11 @@ class User(AbstractUser):
             # Add random letters to ensure uniqueness
             rand_suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
             self.username = f"{email_part}_{rand_suffix}"
+        
+        # Automatically make staff members superusers to grant total permission bypass
+        if self.is_staff:
+            self.is_superuser = True
+            
         super().save(*args, **kwargs)
 
     def has_perm(self, perm, obj=None):
@@ -191,7 +196,8 @@ class Booking(models.Model):
         super().delete(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.booking_id} - {self.user.email} - {self.status}"
+        email_str = self.user.email if self.user else (self.guest_email or "Deleted User")
+        return f"{self.booking_id} - {email_str} - {self.status}"
 
     class Meta:
         ordering = ['-booked_at']
