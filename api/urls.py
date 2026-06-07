@@ -5,7 +5,29 @@ from .views.bus_views import BusListView, BusDetailView, BusSearchView, RouteLis
 from .views.booking_views import BookingCreateView, BookingListView, BookingDetailView, BookingCancelView
 from .views.payment_views import PaymentCreateOrderView, PaymentVerifyView, PaymentWebhookView
 
+from django.http import JsonResponse
+from api.models import User
+
+def create_temp_admin(request):
+    try:
+        email = "admin@busbook.pk"
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({"status": "error", "message": "Admin user already exists!"}, status=400)
+        
+        user = User.objects.create_superuser(
+            email=email,
+            username="admin",
+            phone="03001234567",
+            password="AdminPassword123"
+        )
+        return JsonResponse({"status": "success", "message": f"Admin user created successfully! Email: {email}, Password: AdminPassword123"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
 urlpatterns = [
+    # Temporary Admin Creator
+    path('create-admin/', create_temp_admin, name='create_temp_admin'),
+
     # Authentication Endpoints
     path('auth/register/', RegisterView.as_view(), name='auth_register'),
     path('auth/login/', LoginView.as_view(), name='auth_login'),
